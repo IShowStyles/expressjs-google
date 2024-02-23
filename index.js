@@ -1,49 +1,55 @@
 const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
+const {OAuth2Client} = require('google-auth-library');
+const {PrismaClient} = require('@prisma/client');
 
-const { OAuth2Client } = require('google-auth-library');
-const oauth2Client = new OAuth2Client()
-
+const prisma = new PrismaClient();
 const app = express();
 
-app.use(cors());
-app.post('/auth', async (req, res) => {
-  try {
-    const code = req.headers.authorization;
-    console.log('Authorization Code:', code);
-    const response = await axios.post(
-      'https://oauth2.googleapis.com/token',
-      {
-        code,
-        client_id: '587301-d27f8hofgi6i0.apps.googleusercontent.com',
-        client_secret: 'GOCSPX-u02eNWutQVi',
-        redirect_uri: 'postmessage',
-        grant_type: 'authorization_code'
-      }
-    );
-    const accessToken = response.data.access_token;
-    console.log('Access Token:', accessToken);
+const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
+const CLIENT_SECRET = 'YOUR_CLIENT_SECRET';
+const REDIRECT_URI = 'http://localhost:3000/auth/google/callback';
 
-    // Fetch user details using the access token
-    const userResponse = await axios.get(
-      'https://www.googleapis.com/oauth2/v3/userinfo',
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      }
-    );
-    const userDetails = userResponse.data;
-    console.log('User Details:', userDetails);
-    res.status(200).json({ message: 'Authentication successful' });
-  } catch (error) {
-    console.error('Error saving code:', error);
-    res.status(500).json({ message: 'Failed to save code' });
-  }
+const oauth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+
+app.get('/auth/google', (req, res) => {
+  const url = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: [
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+    ],
+  });
+  res.redirect(url);
 });
 
+app.get('/auth/google/callback', async (req, res) => {
+  const {code} = req.query;
+  const {tokens} = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
+  const oauth2 = google.oauth2({
+    auth: oauth2Client,
+    version: 'v2',
+  });
+  const userInfo = await oauth2.userinfo.get();
+  const user = await prisma.user.upsert({
+    where: { googleId: userInfo.data.id },
+    update: {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+    },
+    create: {
+      googleId: userInfo.data.id,
+      email: userInfo.data.email,
+      name: userInfo.data.name,
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+    },
+  });
 
-app.listen(4000, () => {
-  console.log('Server running on port 4000');
+  res.send('Authentication successful!');
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
