@@ -32,7 +32,7 @@ app.get('/auth/google/callback', async (req, res) => {
   });
   const userInfo = await oauth2.userinfo.get();
   const user = await prisma.user.upsert({
-    where: { googleId: userInfo.data.id },
+    where: {googleId: userInfo.data.id},
     update: {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
@@ -50,6 +50,12 @@ app.get('/auth/google/callback', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res)=> {
+  res.send("helloworld")
+});
+
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
