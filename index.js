@@ -5,8 +5,8 @@ const {PrismaClient} = require('@prisma/client');
 const prisma = new PrismaClient();
 const app = express();
 
-const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
-const CLIENT_SECRET = 'YOUR_CLIENT_SECRET';
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = 'http://localhost:3000/auth/google/callback';
 
 const oauth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
