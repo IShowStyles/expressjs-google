@@ -1,7 +1,6 @@
-const express = require('express');
-const {OAuth2Client} = require('google-auth-library');
-const open = require('open');
-
+import express from 'express'
+import {OAuth2Client} from'google-auth-library';
+import open from 'open';
 const app = express();
 
 async function getAuthenticatedClient() {
