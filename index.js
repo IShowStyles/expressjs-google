@@ -28,28 +28,24 @@ app.get('/auth/google/callback', async (req, res) => {
   const {tokens} = await oauth2Client.getToken(code);
   console.log();
   oauth2Client.setCredentials(tokens);
-  const oauth2 = google.oauth2({
-    auth: oauth2Client,
-    version: 'v2',
-  });
+  const oauth2 = google.get()
   console.log(oauth2);
-  // const userInfo = await oauth2.userinfo.get();
-  const userInfo = await oauth2.get()
-  console.log(userInfo);
-  const user = await prisma.user.upsert({
-    where: {googleId: userInfo.data.id},
-    update: {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-    },
-    create: {
-      googleId: userInfo.data.id,
-      email: userInfo.data.email,
-      name: userInfo.data.name,
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-    },
-  });
+  // const userInfo = a/wait oauth2.get()
+  // console.log(oauth2);
+  // const user/ = await prisma.user.upsert({
+  //   where: {googleId: userInfo.data.id},
+  //   update: {
+  //     accessToken: tokens.access_token,
+  //     refreshToken: tokens.refresh_token,
+  //   },
+  //   create: {
+  //     googleId: userInfo.data.id,
+  //     email: userInfo.data.email,
+  //     name: userInfo.data.name,
+  //     accessToken: tokens.access_token,
+  //     refreshToken: tokens.refresh_token,
+  //   },
+  // });
 
   res.send('Authentication successful!');
 });
