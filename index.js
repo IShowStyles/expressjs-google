@@ -46,6 +46,5 @@ async function main() {
 }
 
 app.listen(3001, () => {
-  console.log(`Express app listening on port ${port}`);
   main().catch(console.error);
 });
