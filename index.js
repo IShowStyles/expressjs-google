@@ -7,7 +7,9 @@ const app = express();
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const REDIRECT_URI = 'http://localhost:3000/auth/google/callback';
+const REDIRECT_URI = 'https://expressjs-google.onrender.com/auth/google/callback';
+
+console.log(CLIENT_SECRET,CLIENT_ID);
 
 const oauth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
@@ -49,7 +51,7 @@ app.get('/auth/google/callback', async (req, res) => {
   res.send('Authentication successful!');
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 app.get('/', (req, res)=> {
   res.send("helloworld")
